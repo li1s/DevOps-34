@@ -57,8 +57,15 @@ Jsonnet: Jsonnet
 
 ![image](https://github.com/li1s/DevOps-34/assets/26691938/ef0de702-138a-4bc4-be3a-437dbc7709a4)
 
+#### Terraform: 
 
+#### Bash
+![Alt text](image-1.png)
+#### Markdown
+![Alt text](image.png)
+#### Yaml
 
+#### Jsonnet 
 Задание 2
 Текст Задания 2
 
@@ -66,8 +73,3 @@ Jsonnet: Jsonnet
 Текст и скриншоты ответа к заданию 2
 
 
-Задание 3
-Текст Задания 3
-
-Решение 3
-Текст и скриншоты ответа к заданию 3
