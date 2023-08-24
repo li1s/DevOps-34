@@ -50,7 +50,7 @@ GitHub.
 
 И ещё раз посмотреть выводы команд git status, git diff и git diff --staged.
 
-Создание файлов .gitignore и второго коммита
+#### Создание файлов .gitignore и второго коммита
 Создайте файл .gitignore (обратите внимание на точку в начале файла), проверьте его статус сразу после создания.
 Добавьте файл .gitignore в следующий коммит (git add...).
 На одном из следующих блоков вы будете изучать Terraform, давайте сразу создадим соотвествующий каталог terraform и внутри этого каталога — файл .gitignore по примеру: https://github.com/github/gitignore/blob/master/Terraform.gitignore.
@@ -85,3 +85,14 @@ Moved and deleted — после удаления и перемещения вр
 - [x] git status
 - [x] git diff  
 - [x] git diff --staged
+
+
+#### Задание 2: Создать и настроить репозиторий для дальнейшей работы на курсе
+##### Создание файлов .gitignore и второго коммита
+- [x] Создайте файл .gitignore
+- [x] git status
+- [x] Kаталог terraform и внутри этого каталога — файл .gitignore по примеру: https://github.com/github/gitignore/blob/master/Terraform.gitignore.
+- [x] git status
+- [x] 
+- [x]
+
