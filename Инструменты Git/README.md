@@ -172,6 +172,7 @@ Date:   Thu Mar 5 21:12:06 2020 +0000
 
 _________________________________________________________
     4: Найдите коммит, в котором была создана функция func providerSource, её определение в коде выглядит так: func providerSource(...) (вместо троеточия перечислены аргументы).
+
 Проверяем командой: ```git log -S"func providerSource"```
 Результат следующий:
 ``` 
@@ -197,8 +198,11 @@ commit 8c928e83589d90a031f811fae52a81be7153e82f
 Исходя из даты создания 2 Апреля 2020 года.
 _________________________________________________________
     5: Найдите все коммиты, в которых была изменена функция globalPluginDirs.
-Проверяем командой: ``` git log -S globalPluginDirs --oneline ```
-Результат: 
+### Неправильное решение. 
+~~Проверяем командой: ``` git log -S globalPluginDirs --oneline ```~~
+
+~~Результат:~~
+
 ```
 65c4ba7363 Remove terraform binary
 125eb51dc4 Remove accidentally-committed binary
@@ -208,17 +212,200 @@ _________________________________________________________
 c0b1761096 prevent log output during init
 8364383c35 Push plugin discovery down into command package
 ```
+### После комментария преподователя Булат Замилов: 
+Тут не подходит ключ -S, так как он определяет изменения строки, а нам нужно изменение функции, то есть не только ее параметы или имя, а еще и тело. Воспользуйтесь ключом -L
+
+Делаем в два этапа: 
+
+1 - ```git grep "globalPluginDirs"```
+
+Вывод команды: 
+```
+commands.go:            GlobalPluginDirs: globalPluginDirs(),
+commands.go:    helperPlugins := pluginDiscovery.FindPlugins("credentials", globalPluginDirs())
+internal/command/cliconfig/config_unix.go:              // FIXME: homeDir gets called from globalPluginDirs during init, before
+plugins.go:// globalPluginDirs returns directories that should be searched for
+plugins.go:func globalPluginDirs() []string {
+```
+2 - ```git log -L :globalPluginDirs:plugins.go```
+
+Вывод команды: 
+```
+commit 78b12205587fe839f10d946ea3fdc06719decb05
+Author: Pam Selle <204372+pselle@users.noreply.github.com>
+Date:   Mon Jan 13 16:50:05 2020 -0500
+
+    Remove config.go and update things using its aliases
+
+diff --git a/plugins.go b/plugins.go
+--- a/plugins.go
++++ b/plugins.go
+@@ -16,14 +18,14 @@
+ func globalPluginDirs() []string {
+        var ret []string
+        // Look in ~/.terraform.d/plugins/ , or its equivalent on non-UNIX
+-       dir, err := ConfigDir()
++       dir, err := cliconfig.ConfigDir()
+        if err != nil {
+                log.Printf("[ERROR] Error finding global config directory: %s", err)
+        } else {
+                machineDir := fmt.Sprintf("%s_%s", runtime.GOOS, runtime.GOARCH)
+                ret = append(ret, filepath.Join(dir, "plugins"))
+                ret = append(ret, filepath.Join(dir, "plugins", machineDir))
+        }
+ 
+        return ret
+ }
+
+commit 52dbf94834cb970b510f2fba853a5b49ad9b1a46
+Author: James Bardin <j.bardin@gmail.com>
+Date:   Wed Aug 9 17:46:49 2017 -0400
+
+    keep .terraform.d/plugins for discovery
+
+diff --git a/plugins.go b/plugins.go
+--- a/plugins.go
++++ b/plugins.go
+@@ -16,13 +16,14 @@
+ func globalPluginDirs() []string {
+        var ret []string
+        // Look in ~/.terraform.d/plugins/ , or its equivalent on non-UNIX
+        dir, err := ConfigDir()
+        if err != nil {
+                log.Printf("[ERROR] Error finding global config directory: %s", err)
+        } else {
+                machineDir := fmt.Sprintf("%s_%s", runtime.GOOS, runtime.GOARCH)
++               ret = append(ret, filepath.Join(dir, "plugins"))
+                ret = append(ret, filepath.Join(dir, "plugins", machineDir))
+        }
+ 
+        return ret
+ }
+
+commit 41ab0aef7a0fe030e84018973a64135b11abcd70
+Author: James Bardin <j.bardin@gmail.com>
+Date:   Wed Aug 9 10:34:11 2017 -0400
+
+    Add missing OS_ARCH dir to global plugin paths
+    
+    When the global directory was added, the discovery system still
+    attempted to search for OS_ARCH subdirectories. It has since been
+    changed only search explicit paths.
+
+diff --git a/plugins.go b/plugins.go
+--- a/plugins.go
++++ b/plugins.go
+@@ -14,12 +16,13 @@
+ func globalPluginDirs() []string {
+        var ret []string
+        // Look in ~/.terraform.d/plugins/ , or its equivalent on non-UNIX
+        dir, err := ConfigDir()
+        if err != nil {
+                log.Printf("[ERROR] Error finding global config directory: %s", err)
+        } else {
+-               ret = append(ret, filepath.Join(dir, "plugins"))
++               machineDir := fmt.Sprintf("%s_%s", runtime.GOOS, runtime.GOARCH)
++               ret = append(ret, filepath.Join(dir, "plugins", machineDir))
+        }
+ 
+        return ret
+ }
+
+commit 66ebff90cdfaa6938f26f908c7ebad8d547fea17
+Author: James Bardin <j.bardin@gmail.com>
+Date:   Wed May 3 22:24:51 2017 -0400
+
+    move some more plugin search path logic to command
+    
+    Make less to change when we remove the old search path
+
+diff --git a/plugins.go b/plugins.go
+--- a/plugins.go
++++ b/plugins.go
+@@ -16,22 +14,12 @@
+ func globalPluginDirs() []string {
+        var ret []string
+-
+-       // Look in the same directory as the Terraform executable.
+-       // If found, this replaces what we found in the config path.
+-       exePath, err := osext.Executable()
+-       if err != nil {
+-               log.Printf("[ERROR] Error discovering exe directory: %s", err)
+-       } else {
+-               ret = append(ret, filepath.Dir(exePath))
+-       }
+-
+        // Look in ~/.terraform.d/plugins/ , or its equivalent on non-UNIX
+        dir, err := ConfigDir()
+        if err != nil {
+                log.Printf("[ERROR] Error finding global config directory: %s", err)
+        } else {
+                ret = append(ret, filepath.Join(dir, "plugins"))
+        }
+ 
+        return ret
+ }
+
+commit 8364383c359a6b738a436d1b7745ccdce178df47
+Author: Martin Atkins <mart@degeneration.co.uk>
+Date:   Thu Apr 13 18:05:58 2017 -0700
+
+    Push plugin discovery down into command package
+    
+    Previously we did plugin discovery in the main package, but as we move
+    towards versioned plugins we need more information available in order to
+    resolve plugins, so we move this responsibility into the command package
+    itself.
+    
+    For the moment this is just preserving the existing behavior as long as
+    there are only internal and unversioned plugins present. This is the
+    final state for provisioners in 0.10, since we don't want to support
+    versioned provisioners yet. For providers this is just a checkpoint along
+    the way, since further work is required to apply version constraints from
+    configuration and support additional plugin search directories.
+    
+    The automatic plugin discovery behavior is not desirable for tests because
+    we want to mock the plugins there, so we add a new backdoor for the tests
+    to use to skip the plugin discovery and just provide their own mock
+    implementations. Most of this diff is thus noisy rework of the tests to
+    use this new mechanism.
+
+diff --git a/plugins.go b/plugins.go
+--- /dev/null
++++ b/plugins.go
+@@ -0,0 +16,22 @@
++func globalPluginDirs() []string {
++       var ret []string
++
++       // Look in the same directory as the Terraform executable.
++       // If found, this replaces what we found in the config path.
++       exePath, err := osext.Executable()
++       if err != nil {
++               log.Printf("[ERROR] Error discovering exe directory: %s", err)
++       } else {
++               ret = append(ret, filepath.Dir(exePath))
++       }
++
++       // Look in ~/.terraform.d/plugins/ , or its equivalent on non-UNIX
++       dir, err := ConfigDir()
++       if err != nil {
++               log.Printf("[ERROR] Error finding global config directory: %s", err)
+:
+
+```
 _________________________________________________________
     6: Кто автор функции synchronizedWriters?
 _________________________________________________________
+
 Проверяем командой: ``` git log -S synchronizedWriters ```
-Результат: 
+
+Результат:
 ```
 commit bdfea50cc85161dea41be0fe3381fd98731ff786
 Author: James Bardin <j.bardin@gmail.com>
 Date:   Mon Nov 30 18:02:04 2020 -0500
 
-    remove unused
+    remove unused~~
 
 commit fd4f7eb0b935e5a838810564fd549afe710ae19a
 Author: James Bardin <j.bardin@gmail.com>
