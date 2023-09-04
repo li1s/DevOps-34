@@ -6,5 +6,8 @@ for param in "$@"; do
     echo "\$@ Parameter #$count = $param"
     count=$(( $count + 1 ))
 done
+<<<<<<< HEAD
 
 echo "====="
+=======
+>>>>>>> a2ed35f (git-rebase1)
