@@ -94,8 +94,9 @@ sudo docker images
 sudo docker push l1is/slebedev-nginx-devops34:latest
 ```
 
-Сcылка на опубликованный fork: ``` https://hub.docker.com/r/l1is/slebedev-nginx-devops34 ```
+``` https://hub.docker.com/r/l1is/slebedev-nginx-devops34 ```
 
+[Сcылка на опубликованный fork:](https://hub.docker.com/r/l1is/slebedev-nginx-devops34) 
 _________________________________________________________
 ### Решение 2:
 
