@@ -96,7 +96,7 @@ sudo docker push l1is/slebedev-nginx-devops34:latest
 
 ``` https://hub.docker.com/r/l1is/slebedev-nginx-devops34 ```
 
-[Сcылка на опубликованный fork:](https://hub.docker.com/r/l1is/slebedev-nginx-devops34) 
+[Сcылка на опубликованный fork:](https://hub.docker.com/r/l1is/slebedev-nginx-devops34)
 _________________________________________________________
 ### Решение 2:
 
@@ -139,3 +139,65 @@ _________________________________________________________
 <i><b> Общий вывод:
 Для большинства из перечисленных случаев рекомендуется использовать виртуализацию или Docker, так как они обеспечивают изоляцию, гибкость и масштабируемость. Однако, в случае мобильных приложений и шины данных на базе Apache Kafka, рекомендуется использовать физические машины или виртуализацию для обеспечения высокой производительности и низкой задержки.    
 _________________________________________________________
+
+### Решение 3: 
+
+```sudo docker pull centos:latest```  
+```sudo docker pull debian:latest```  
+```sudo docker images ```   
+```sudo docker run -it -d -v /home/l1is/Netology/DevOps-34/data/:/data centos:latest```   
+```sudo docker run -it -d -v /home/l1is/Netology/DevOps-34/data/:/data debian:latest```  
+
+```sudo docker ps ```
+``` bash 
+CONTAINER ID   IMAGE           COMMAND       CREATED          STATUS          PORTS     NAMES
+c2de4b73a073   debian:latest   "bash"        4 seconds ago    Up 3 seconds              nostalgic_beaver
+ac53f743364f   centos:latest   "/bin/bash"   40 seconds ago   Up 39 seconds             nice_swirles
+```
+```docker exec ac53f743364f sh -c "echo 'Привет, мир!' > /data/centos.txt"```    
+
+```docker exec ac53f743364f sh -c "echo 'Это обучение по Docker!' > /data/centos1.txt"```
+
+
+```docker exec c2de4b73a073 ls -la /data```    
+``` bashtotal 4
+drwxrwxrwx 1 root root  512 Sep 20 19:45 .
+drwxr-xr-x 1 root root 4096 Sep 20 19:44 ..
+-rw-r--r-- 1 root root   22 Sep 20 19:45 centos.txt
+-rw-r--r-- 1 root root   37 Sep 20 19:45 centos1.txt
+```
+```docker exec c2de4b73a073 ls -la /data; docker exec c2de4b73a073 cat /data/centos.txt; docker exec c2de4b73a073 cat /data/centos1.txt```   
+``` bash 
+total 4
+drwxrwxrwx 1 root root  512 Sep 20 19:45 .
+drwxr-xr-x 1 root root 4096 Sep 20 19:44 ..
+-rw-r--r-- 1 root root   22 Sep 20 19:45 centos.txt
+-rw-r--r-- 1 root root   37 Sep 20 19:45 centos1.txt
+Привет, мир!
+Это обучение по Docker!
+
+```
+
+_________________________________________________________
+
+### Решение 4*
+Для решения этой задачи был создан новый Dockerfile, далее выполнялись команды:   
+- ``` sudo docker pull alpine:3.14```
+- ``` sudo  docker build -t l1is/ansible-sl-200923 . ```
+- ``` sudo docker images ```
+- ``` sudo  docker push l1is/ansible-sl-200923:latest ```
+- ``` sudo docker run -it  l1is/ansible-sl-200923:latest ```
+```bash 
+ansible-playbook [core 2.15.4]
+  config file = None
+  configured module search path = ['/root/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules']
+  ansible python module location = /usr/lib/python3.9/site-packages/ansible
+  ansible collection location = /root/.ansible/collections:/usr/share/ansible/collections
+  executable location = /usr/bin/ansible-playbook
+  python version = 3.9.17 (main, Jun  9 2023, 02:31:24) [GCC 10.3.1 20210424] (/usr/bin/python3)
+  jinja version = 3.1.2
+  libyaml = True
+
+```
+
+[Сcылка на контейнер с домашим заданием](https://hub.docker.com/r/l1is/ansible-sl-200923) :   https://hub.docker.com/r/l1is/ansible-sl-200923
