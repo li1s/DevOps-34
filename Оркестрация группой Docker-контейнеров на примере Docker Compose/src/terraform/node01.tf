@@ -5,16 +5,16 @@ resource "yandex_compute_instance" "node01" {
   allow_stopping_for_update = true
 
   resources {
-    cores  = 8
-    memory = 8
+    cores  = 1
+    memory = 2
   }
 
   boot_disk {
     initialize_params {
-      image_id    = "${var.centos-7-base}"
+      image_id    = "${var.debian-11}"
       name        = "root-node01"
       type        = "network-nvme"
-      size        = "50"
+      size        = "20"
     }
   }
 
@@ -24,6 +24,6 @@ resource "yandex_compute_instance" "node01" {
   }
 
   metadata = {
-    ssh-keys = "centos:${file("~/.ssh/id_rsa.pub")}"
+    ssh-keys = "debian:${file("~/.ssh/id_rsa.pub")}"
   }
 }
