@@ -7,7 +7,7 @@
       "image_family": "centos",
       "image_name": "centos-7-base",
       "source_image_family": "centos-7",
-      "ssh_username": "sl",
+      "ssh_username": "centos",
       "subnet_id": "e9bsnn14l430roir70g2",
       "token": "",
       "type": "yandex",
