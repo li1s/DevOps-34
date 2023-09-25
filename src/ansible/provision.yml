@@ -13,8 +13,8 @@
         copy: src=~/.ssh/id_rsa.pub dest=/root/.ssh/authorized_keys owner=root mode=0600
         ignore_errors: yes
 
-      - name: Checking DNS
-        command: host -t A google.com
+    #  - name: Checking DNS
+    #    command: host -t A google.com
 
       - name: Installing tools
         yum: >

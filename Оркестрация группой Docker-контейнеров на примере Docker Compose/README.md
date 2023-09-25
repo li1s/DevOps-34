@@ -51,5 +51,15 @@ _________________________________________________________
 ## Решение 2.
 ![Alt text](image-3.png)
 ![Alt text](image-2.png)
-
+![Alt text](image-6.png)
 ![Alt text](image-1.png)
+
+## Решение 3.
+
+
+
+![Alt text](image-5.png)
+![Alt text](image-8.png)
+
+## Решение 4
+![Alt text](image-7.png)
