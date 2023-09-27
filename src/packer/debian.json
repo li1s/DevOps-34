@@ -5,7 +5,7 @@
         "folder_id": "b1g5ofg36cpjm42tl9nr",
         "image_description": "by packer",
         "image_family": "debian-11",
-        "token": "y0_AgAAAAAh-MiIAATuwQAAAADtQIY6aOu6q9DSQ56C_BrCyltuSbnov-Q",
+        "token": "",
 	"image_name": "debian-11",
         "source_image_family": "debian-11",
         "ssh_username": "debian",
