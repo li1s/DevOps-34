@@ -150,6 +150,24 @@ resource "docker_container" "nginx" {
 
 ``` docker rmi nginx:latest```
 
+<b><i> Комментарий преподователя: Задание про удаление образа не верно. В коде указан параметр который не разрешает терраформу удалить образ контейнера. Нужно его указать.</b></i>
+
+Согласно нашему коду, Docker образ не был удален из-за строчки: ``` keep_locally = true ```. 
+Базовый блок кода выглядит следующим образом
+``` bash 
+resource "docker_image" "nginx" {
+  name         = "nginx:latest"
+}
+```
+
+А в нашем коде: 
+``` bash
+resource "docker_image" "nginx" {
+  name         = "nginx:latest"
+  keep_locally = true
+}
+```
+
 ## Решение 2*
 Сперва написал файд ```main.tf``` с описанием виртуальной машины создаваемой на VitrualBox, далее выполнил команду: ``` terraform init```
 ![Alt text](image-8.png)
