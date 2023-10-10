@@ -1,24 +1,13 @@
-# resource "yandex_vpc_network" "develop" {
-#   name = var.vpc_name
-# }
-# resource "yandex_vpc_subnet" "develop" {
-#   name           = var.vpc_name
-#   zone           = var.default_zone
-#   network_id     = "${yandex_vpc_network.develop.id}"
-#   v4_cidr_blocks = var.default_cidr
-# }
-
-
 data "yandex_compute_image" "ubuntu" {
   family = "ubuntu-2004-lts"
 }
 resource "yandex_compute_instance" "platform" {
-  name        = "netology-develop-platform-web"
+  name        = local.vm_web
   platform_id = "standard-v1" # Платформы v4 нет + опечатка standarT, а должно быть standarD. ссылка: https://cloud.yandex.ru/docs/compute/concepts/vm-platforms
   resources {
-    cores         = 2 # Минимальное значение vCPU = 2. ccылка: https://cloud.yandex.ru/docs/compute/concepts/performance-levels
-    memory        = 1
-    core_fraction = 5
+    cores         = var.vms_resources.vm_web_resources.cores # Минимальное значение vCPU = 2. ccылка: https://cloud.yandex.ru/docs/compute/concepts/performance-levels
+    memory        = var.vms_resources.vm_web_resources.memory
+    core_fraction = var.vms_resources.vm_web_resources.core_fraction
   }
   boot_disk {
     initialize_params {
@@ -29,13 +18,13 @@ resource "yandex_compute_instance" "platform" {
     preemptible = true
   }
   network_interface {
-    subnet_id = "e9bsnn14l430roir70g2"
+    subnet_id = var.vm_web_vpc_name
     nat       = true
   }
 
   metadata = {
-    serial-port-enable = 1
-    ssh-keys           = "ubuntu:${var.vms_ssh_root_key}"
+    serial-port-enable = var.metadata.serial-port-enable
+    ssh-keys           = var.metadata.ssh-keys
   }
 
 }

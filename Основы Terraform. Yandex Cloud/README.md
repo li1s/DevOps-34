@@ -62,10 +62,10 @@
 
 - Вместо использования трёх переменных ".._cores",".._memory",".._core_fraction" в блоке resources {...}, объедините их в переменные типа map с именами "vm_web_resources" и "vm_db_resources". В качестве продвинутой практики попробуйте создать одну map-переменную vms_resources и уже внутри неё конфиги обеих ВМ — вложенный map.
 - Также поступите с блоком metadata {serial-port-enable, ssh-keys}, эта переменная должна быть общая для всех ваших ВМ.
-    Найдите и удалите все более не используемые переменные проекта.
-    Проверьте terraform plan. Изменений быть не должно.
+- Найдите и удалите все более не используемые переменные проекта.
+- Проверьте terraform plan. Изменений быть не должно.
 
-Дополнительное задание (со звёздочкой*)
+## Дополнительное задание (со звёздочкой*)
 
 Настоятельно рекомендуем выполнять все задания со звёздочкой.
 Они помогут глубже разобраться в материале. Задания со звёздочкой дополнительные, не обязательные к выполнению и никак не повлияют на получение вами зачёта по этому домашнему заданию.
@@ -216,27 +216,299 @@ Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
 
 ## Решение 2:
 
+После изменения файла ```variables.tf``` с добавлением к именам переменных ```vm_web``` c последующим изменением файлов проекта, выполнил команду ```terraform plan```
+Вывод команды ниже: 
+
+``` bash
+❯ terraform plan
+data.yandex_compute_image.ubuntu: Reading...
+data.yandex_compute_image.ubuntu: Read complete after 0s [id=fd826honb8s0i1jtt6cg]
+yandex_compute_instance.platform: Refreshing state... [id=fhm2n8pvvof7sb860dcf]
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration and found no differences, so no changes are needed.
+```
 
 
 
 ## Решение 3:
 
+В корне проекта был создан файл ```vms_platform.tf ``` 
+Переменные указаны в начале файла: 
+![Alt text](image-3.png)
+После выполнены команды:   
+```terraform plan```
 
+```terraform apply```
+``` bash
+terraform apply
+data.yandex_compute_image.ubuntu-vm-db: Reading...
+data.yandex_compute_image.ubuntu: Reading...
+data.yandex_compute_image.ubuntu-vm-db: Read complete after 1s [id=fd826honb8s0i1jtt6cg]
+data.yandex_compute_image.ubuntu: Read complete after 1s [id=fd826honb8s0i1jtt6cg]
+yandex_compute_instance.platform: Refreshing state... [id=fhm2n8pvvof7sb860dcf]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # yandex_compute_instance.platform-db will be created
+  + resource "yandex_compute_instance" "platform-db" {
+      + created_at                = (known after apply)
+      + folder_id                 = (known after apply)
+      + fqdn                      = (known after apply)
+      + gpu_cluster_id            = (known after apply)
+      + hostname                  = (known after apply)
+      + id                        = (known after apply)
+      + metadata                  = {
+          + "serial-port-enable" = "1"
+          + "ssh-keys"           = "ubuntu:ssh-ed25519 ###" #  Открытая часть ключа намеренo убрана
+        }
+      + name                      = "netology-develop-platform-db"
+      + network_acceleration_type = "standard"
+      + platform_id               = "standard-v1"
+      + service_account_id        = (known after apply)
+      + status                    = (known after apply)
+      + zone                      = (known after apply)
+
+      + boot_disk {
+          + auto_delete = true
+          + device_name = (known after apply)
+          + disk_id     = (known after apply)
+          + mode        = (known after apply)
+
+          + initialize_params {
+              + block_size  = (known after apply)
+              + description = (known after apply)
+              + image_id    = "fd826honb8s0i1jtt6cg"
+              + name        = (known after apply)
+              + size        = (known after apply)
+              + snapshot_id = (known after apply)
+              + type        = "network-hdd"
+            }
+        }
+
+      + network_interface {
+          + index              = (known after apply)
+          + ip_address         = (known after apply)
+          + ipv4               = true
+          + ipv6               = (known after apply)
+          + ipv6_address       = (known after apply)
+          + mac_address        = (known after apply)
+          + nat                = true
+          + nat_ip_address     = (known after apply)
+          + nat_ip_version     = (known after apply)
+          + security_group_ids = (known after apply)
+          + subnet_id          = "e9bsnn14l430roir70g2"
+        }
+
+      + resources {
+          + core_fraction = 20
+          + cores         = 2
+          + memory        = 2
+        }
+
+      + scheduling_policy {
+          + preemptible = true
+        }
+    }
+
+Plan: 1 to add, 0 to change, 0 to destroy.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+yandex_compute_instance.platform-db: Creating...
+yandex_compute_instance.platform-db: Still creating... [10s elapsed]
+yandex_compute_instance.platform-db: Still creating... [20s elapsed]
+yandex_compute_instance.platform-db: Still creating... [30s elapsed]
+yandex_compute_instance.platform-db: Creation complete after 33s [id=fhme41k6m9bel5p5pags]
+
+Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
+
+
+```
+![Alt text](image-2.png)
 
 
 ## Решение 4:
+ 
+В файле ```outputs.tf```:    
+``` bash
+output "vm_ips" {
+  value = {
+    netology-develop-platform-web = "158.160.33.19"
+    netology-develop-platform-db  = "158.160.33.115"
+  }
+}
+```
+
+``` bash 
+terraform apply
+data.yandex_compute_image.ubuntu-vm-db: Reading...
+data.yandex_compute_image.ubuntu: Reading...
+data.yandex_compute_image.ubuntu-vm-db: Read complete after 0s [id=fd826honb8s0i1jtt6cg]
+data.yandex_compute_image.ubuntu: Read complete after 0s [id=fd826honb8s0i1jtt6cg]
+yandex_compute_instance.platform-db: Refreshing state... [id=fhme41k6m9bel5p5pags]
+yandex_compute_instance.platform: Refreshing state... [id=fhm2n8pvvof7sb860dcf]
+
+Changes to Outputs:
+  + vm_ips = {
+      + netology-develop-platform-db  = "158.160.33.115"
+      + netology-develop-platform-web = "158.160.33.19"
+    }
+
+You can apply this plan to save these new output values to the Terraform state, without changing any real infrastructure.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
 
 
+Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+vm_ips = {
+  "netology-develop-platform-db" = "158.160.33.115"
+  "netology-develop-platform-web" = "158.160.33.19"
+}
+
+
+```
 
 
 ## Решение 5:
+В файле ```locals.tf``` 
+``` bash
+locals {
+  vm_web = "${var.company}-${var.dev}-${var.vm_name}-${var.vm_web}"
+  vm_db = "${var.company}-${var.dev}-${var.vm_name}-${var.vm_db}"
+}
+```
+В файле ```variables.tf```
+```bash
+variable "company" {
+  default = "netology"
+}
 
+variable "dev" {
+  default = "develop"
+}
 
+variable "vm_name" {
+  default = "plarform"
+}
+
+variable "vm_web" {
+  default = "web"
+}
+variable "vm_db" {
+  default = "db"
+}
+```
+
+```bash 
+resource "yandex_compute_instance" "platform" {
+  name        = local.vm_web
+```
+
+``` bash
+resource "yandex_compute_instance" "platform-db" {
+  name        = local.vm_db
+```
 
 
 ## Решение 6:
 
+В файле ```variables.tf``` 
+``` bash
+variable "vms_resources" {
+  type = map
+  default = {
+    vm_web_resources = {
+      cores = 2
+      memory = 1
+      core_fraction = 5
+    }
+    vm_db_resources = {
+      cores = 2
+      memory = 2
+      core_fraction = 20
+    }
+  }
+}
+
+variable "metadata" {
+  type = map
+  default = {
+    serial-port-enable = true
+    ssh-keys = "ssh-ed25519 ###" # Открытая часть ключа скрыта намерено 
+  }
+}
+
+```
+В файле: ```main.tf ``` 
+``` bash 
+resources {
+    cores         = var.vms_resources.vm_web_resources.cores # Минимальное значение vCPU = 2. ccылка: https://cloud.yandex.ru/docs/compute/concepts/performance-levels
+    memory        = var.vms_resources.vm_web_resources.memory
+    core_fraction = var.vms_resources.vm_web_resources.core_fraction
+  }
+
+metadata = {
+    serial-port-enable = var.metadata.serial-port-enable
+    ssh-keys           = var.metadata.ssh-keys
+  }
+```
+
+В файле: ```vms_platform.tf```
+``` bash
+resources {
+    cores         = var.vms_resources.vm_db_resources.cores # Минимальное значение vCPU = 2. ccылка: https://cloud.yandex.ru/docs/compute/concepts/performance-levels
+    memory        = var.vms_resources.vm_db_resources.memory
+    core_fraction = var.vms_resources.vm_db_resources.core_fraction
+  }
+
+metadata = {
+    serial-port-enable = var.metadata.serial-port-enable
+    ssh-keys           = var.metadata.ssh-keys
+  }
+
+```
+
+
+## Решение 7 *:
+Для перехода в terraform console пишем команду ```terraform console```   
+
+Далее вывод команд: 
+
+
+``` bash
+local.test_list[1]
+"staging"
+
+
+> length(local.test_list)
+3
 
 
 
-## Решение 7:
+> local.test_map["admin"]
+"John"
+
+
+
+> "${local.test_map["admin"]} is admin for ${local.servers["production"]["image"]} server based on OS ${local.servers["production"]["image"]} with ${local.servers["production"]["cpu"]} vcpu, ${local.servers["production"]["ram"]} ram and ${length(local.servers["production"]["disks"])} virtual disks"
+
+"John is admin for ubuntu-20-04 server based on OS ubuntu-20-04 with 10 vcpu, 40 ram and 4 virtual disks"
+>  
+
+```
