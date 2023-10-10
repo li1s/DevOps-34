@@ -104,9 +104,115 @@
  _________________________________________________________
 
 ## Решение 1:
+Вывод команды terrafrom apply: 
+``` bash
+
+terraform apply
+data.yandex_compute_image.ubuntu: Reading...
+data.yandex_compute_image.ubuntu: Read complete after 1s [id=fd826honb8s0i1jtt6cg]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated
+with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # yandex_compute_instance.platform will be created
+  + resource "yandex_compute_instance" "platform" {
+      + created_at                = (known after apply)
+      + folder_id                 = (known after apply)
+      + fqdn                      = (known after apply)
+      + gpu_cluster_id            = (known after apply)
+      + hostname                  = (known after apply)
+      + id                        = (known after apply)
+      + metadata                  = {
+          + "serial-port-enable" = "1"
+          + "ssh-keys"           = "ubuntu:ssh-ed25519 ### "
+        }
+      + name                      = "netology-develop-platform-web"
+      + network_acceleration_type = "standard"
+      + platform_id               = "standard-v1"
+      + service_account_id        = (known after apply)
+      + status                    = (known after apply)
+      + zone                      = (known after apply)
+
+      + boot_disk {
+          + auto_delete = true
+          + device_name = (known after apply)
+          + disk_id     = (known after apply)
+          + mode        = (known after apply)
+
+          + initialize_params {
+              + block_size  = (known after apply)
+              + description = (known after apply)
+              + image_id    = "fd826honb8s0i1jtt6cg"
+              + name        = (known after apply)
+              + size        = (known after apply)
+              + snapshot_id = (known after apply)
+              + type        = "network-hdd"
+            }
+        }
+
+      + network_interface {
+          + index              = (known after apply)
+          + ip_address         = (known after apply)
+          + ipv4               = true
+          + ipv6               = (known after apply)
+          + ipv6_address       = (known after apply)
+          + mac_address        = (known after apply)
+          + nat                = true
+          + nat_ip_address     = (known after apply)
+          + nat_ip_version     = (known after apply)
+          + security_group_ids = (known after apply)
+          + subnet_id          = "e9bsnn14l430roir70g2"
+        }
+
+      + resources {
+          + core_fraction = 5
+          + cores         = 2
+          + memory        = 1
+        }
+
+      + scheduling_policy {
+          + preemptible = true
+        }
+    }
+
+Plan: 1 to add, 0 to change, 0 to destroy.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+yandex_compute_instance.platform: Creating...
+yandex_compute_instance.platform: Still creating... [10s elapsed]
+yandex_compute_instance.platform: Still creating... [20s elapsed]
+yandex_compute_instance.platform: Still creating... [30s elapsed]
+yandex_compute_instance.platform: Still creating... [40s elapsed]
+yandex_compute_instance.platform: Creation complete after 47s [id=fhm2n8pvvof7sb860dcf]
+
+Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
+
+
+```
+
+Скриншот из YC:   
+
+![Alt text](image.png)
+
+
+Подключенеие по ssh к вновь созданной ВМ. 
+![Alt text](image-1.png)
 
 
 
+<b>Ответы на вопрос:</b> <i>Как в процессе обучения могут пригодиться параметры preemptible = true и core_fraction=5 в параметрах ВМ. Ответ в документации Yandex Cloud.</i>
+
+- <b> preemptible VM </b> - прерываемые ВМ, хороши тем, что если при выполнении ДЗ забыть ее выключить, она будет выключена через случайный момент в промежутке 22-24 часа с момента запуска. Так же этот тип ВМ удобен тем, что если в указанной зоне не будет хватать ресурсов для запуска обычной ВМ, прерываемая будет выключена автоматически.
+
+- <b> core_fraction </b> - уровень производительности CPU. От его значения зависит стоимость ВМ и вычислительные возможности. Виртуальные машины с уровнем производительности меньше 100% имеют доступ к вычислительной мощности физических ядер как минимум на протяжении указанного процента от единицы времени.
 
 ## Решение 2:
 

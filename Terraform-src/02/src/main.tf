@@ -1,12 +1,12 @@
-resource "yandex_vpc_network" "develop" {
-  name = var.vpc_name
-}
-resource "yandex_vpc_subnet" "develop" {
-  name           = var.vpc_name
-  zone           = var.default_zone
-  network_id     = yandex_vpc_network.develop.id
-  v4_cidr_blocks = var.default_cidr
-}
+# resource "yandex_vpc_network" "develop" {
+#   name = var.vpc_name
+# }
+# resource "yandex_vpc_subnet" "develop" {
+#   name           = var.vpc_name
+#   zone           = var.default_zone
+#   network_id     = "${yandex_vpc_network.develop.id}"
+#   v4_cidr_blocks = var.default_cidr
+# }
 
 
 data "yandex_compute_image" "ubuntu" {
@@ -14,9 +14,9 @@ data "yandex_compute_image" "ubuntu" {
 }
 resource "yandex_compute_instance" "platform" {
   name        = "netology-develop-platform-web"
-  platform_id = "standart-v4"
+  platform_id = "standard-v1" # Платформы v4 нет + опечатка standarT, а должно быть standarD. ссылка: https://cloud.yandex.ru/docs/compute/concepts/vm-platforms
   resources {
-    cores         = 1
+    cores         = 2 # Минимальное значение vCPU = 2. ccылка: https://cloud.yandex.ru/docs/compute/concepts/performance-levels
     memory        = 1
     core_fraction = 5
   }
@@ -29,7 +29,7 @@ resource "yandex_compute_instance" "platform" {
     preemptible = true
   }
   network_interface {
-    subnet_id = yandex_vpc_subnet.develop.id
+    subnet_id = "e9bsnn14l430roir70g2"
     nat       = true
   }
 
