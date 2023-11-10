@@ -1,0 +1,19 @@
+[nodes:children]
+webservers
+databases 
+storage 
+
+[webservers]
+{% for host in yandex_compute_instance.web %}
+{{ host }} {{ ip }}
+{% endfor %}
+
+[databases]
+{% for host in yandex_compute_instance.database_vm %}
+{{ ip }}
+{% endfor %}
+
+[storage]
+{% for host in yandex_compute_instance.storage_vm %}
+{{ host }}
+{% endfor %}
