@@ -23,14 +23,14 @@ resource "yandex_compute_instance" "database_vm" {
   scheduling_policy {
     preemptible = true
   }
-  network_interface {
-    subnet_id = var.vpc_name
-    nat       = true
-  }
-
+ 
   metadata = {
     serial-port-enable = var.metadata.serial-port-enable
     ssh-keys           = var.metadata.ssh-keys
+  }
+  network_interface {
+    subnet_id = var.vpc_name
+    nat       = true
   }
 } 
 

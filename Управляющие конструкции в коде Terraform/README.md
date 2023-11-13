@@ -255,19 +255,23 @@ _________________________________________________________
 Содержание файла hosts.tftpl 
 ``` bash 
 [webservers]
-{% for host in webservers %}
-{{ host }}
-{% endfor %}
+%{~ for i in webservers ~} 
+
+${i["name"]}   ansible_host=${i["network_interface"][0]["nat_ip_address"]}               
+%{~ endfor ~}
+
 
 [databases]
-{% for host in databases %}
-{{ host }}
-{% endfor %}
+%{~ for i in databases ~} 
+
+${i["name"]}   ansible_host=${i["network_interface"][0]["nat_ip_address"]}                 
+%{~ endfor ~}
 
 [storage]
-{% for host in storage %}
-{{ host }}
-{% endfor %}
+%{~ for i in storage ~}    
+   
+${i["name"]}   ansible_host=${i["network_interface"][0]["nat_ip_address"]}                   
+%{~ endfor ~}
 
 ```
 _________________________________________________________

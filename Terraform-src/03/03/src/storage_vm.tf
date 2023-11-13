@@ -28,6 +28,7 @@ resource "yandex_compute_instance" "storage_vm" {
 
   network_interface {
     subnet_id = var.vpc_name
+    nat       = true
   }
 }
 resource "yandex_compute_disk" "storage_disk" {
