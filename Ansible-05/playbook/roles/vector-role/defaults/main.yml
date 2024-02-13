@@ -1,0 +1,6 @@
+---
+vector_version: 0.30.0
+clickhouse_user: loger
+clickhouse_password: loger
+dest_host: "127.0.0.1"
+  

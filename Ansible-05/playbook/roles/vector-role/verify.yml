@@ -1,0 +1,34 @@
+---
+# This is an example playbook to execute Ansible tests.
+
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Get status of vector config file
+      ansible.builtin.stat:
+        path: "/etc/vector/vector.yml"
+      register: vector_conf
+    - name: Check if vector config file exists
+      assert:
+        that:
+          - vector_conf.stat.exist == True
+        success_msg: "Vector config file exists"
+        fail_msg: "Vector config file not exist :("
+    - name: Vector config validating
+      ansible.builtin.command: "vector validate --no-environment /etc/vector/vector.yml"
+      register: valid_result
+    - name: Check result of validating
+      assert:
+        that: valid_result.rc == 0
+        success_msg: "Vector config valid!"
+        fail_msg: "Vector config not valid :("
+    - name: Get status vector process
+      ansible.builtin.systemd:
+        name: "vector"
+      register: pg_service_status
+    - name: Check vector running
+      assert:
+        that: pg_service_status.status.ActiveState
+        success_msg: "Started"
+        fail_msg: "Not started :("

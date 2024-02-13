@@ -1,0 +1,21 @@
+---
+sources:
+  source_log_file:
+    type: file
+    ignore_older_secs: 600
+    include:
+      - "{{ ansible_user_dir }}/test.log"
+    read_from: beginning
+sinks:
+  clickhouse:
+    type: clickhouse
+    inputs: 
+      - source_log_file
+    auth: 
+      user: "{{ clickhouse_user }}"
+      password: "{{ clickhouse_password }}"
+      strategy: basic
+    compression: gzip
+    database: logs
+    endpoint: 127.0.0.1:8123
+    table: test_logs

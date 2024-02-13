@@ -1,0 +1,59 @@
+---
+  - name: Get vector rpm
+    ansible.builtin.get_url:
+      url: "https://packages.timber.io/vector/{{ vector_version }}/vector-{{ vector_version }}-1.{{ ansible_architecture }}.rpm"
+      dest: "{{ ansible_user_dir }}/vector-{{ vector_version }}.rpm"
+      mode: '0755'
+    when: (ansible_facts.os_family == "RedHat")
+  - name: Prepare repo
+    become: true
+    ansible.builtin.shell: |
+      cd /etc/yum.repos.d/
+      sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* 
+      sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-* 
+      sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-Linux-* 
+      sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.epel.cloud|g' /etc/yum.repos.d/CentOS-Linux-* 
+    when: ansible_facts.os_family == "RedHat"
+    changed_when: false
+  - name: Install vector rpm
+    become: true
+    ansible.builtin.yum:
+      name: "{{ ansible_user_dir }}/vector-{{ vector_version }}.rpm"
+      state: installed
+      disable_gpg_check: true
+    #  cacheonly: true
+    when: ansible_facts.os_family == "RedHat"
+  - name: Get vector deb
+    ansible.builtin.get_url:
+      url: "https://packages.timber.io/vector/{{ vector_version }}/vector_{{ vector_version }}-1_amd64.deb"
+      dest: "{{ ansible_user_dir }}/vector-{{ vector_version }}.deb"
+      mode: '0755'
+    when: (ansible_facts.os_family == "Debian")
+  - name: Install vector deb
+    #become: true
+    ansible.builtin.apt:
+      deb: "{{ ansible_user_dir }}/vector-{{ vector_version }}.deb"
+      state: present
+      update_cache: true
+    register: module_output
+    
+    when: ansible_facts.os_family == "Debian"
+  - name: Configure Vector | Template config
+    #become: true
+    ansible.builtin.template:
+      src: vector.yml.j2
+      mode: 0644
+      dest: "{{ vector_config_dir }}/vector.yml"
+  - name: Create source log file
+    #become: true
+    ansible.builtin.file:
+      path: "{{ ansible_user_dir }}/test.log"
+      state: touch
+      mode: 0644
+      access_time: preserve
+      modification_time: preserve    
+  - name: Start vector process
+    ansible.builtin.shell: vector --config /etc/vector/vector.yml >/dev/null 2>&1 &
+    async: 10
+    poll: 0
+    changed_when: false

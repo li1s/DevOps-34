@@ -1,0 +1,257 @@
+[ditry@master_home vector-role]$ molecule test
+INFO     default scenario test matrix: dependency, lint, cleanup, destroy, syntax, create, prepare, converge, idempotence, side_effect, verify, cleanup, destroy
+INFO     Performing prerun...
+INFO     Set ANSIBLE_LIBRARY=/home/ditry/.cache/ansible-compat/f5bcd7/modules:/home/ditry/.ansible/plugins/modules:/usr/share/ansible/plugins/modules
+INFO     Set ANSIBLE_COLLECTIONS_PATH=/home/ditry/.cache/ansible-compat/f5bcd7/collections:/home/ditry/.ansible/collections:/usr/share/ansible/collections
+INFO     Set ANSIBLE_ROLES_PATH=/home/ditry/.cache/ansible-compat/f5bcd7/roles:/home/ditry/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles
+INFO     Running default > dependency
+WARNING  Skipping, missing the requirements file.
+WARNING  Skipping, missing the requirements file.
+INFO     Running default > lint
+COMMAND: yamllint .
+ansible-lint
+flake8
+
+WARNING: PATH altered to include /usr/bin
+ERROR    FATAL: Ansible CLI (2.15.3) and python module (2.11.12) versions do not match. This indicates a broken execution environment.
+INFO     Running default > cleanup
+WARNING  Skipping, cleanup playbook not configured.
+INFO     Running default > destroy
+INFO     Sanity checks: 'docker'
+
+PLAY [Destroy] *****************************************************************
+
+TASK [Destroy molecule instance(s)] ********************************************
+changed: [localhost] => (item=centos_8)
+changed: [localhost] => (item=ubuntu_last)
+
+TASK [Wait for instance(s) deletion to complete] *******************************
+ok: [localhost] => (item=centos_8)
+ok: [localhost] => (item=ubuntu_last)
+
+TASK [Delete docker networks(s)] ***********************************************
+skipping: [localhost]
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=2    changed=1    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0
+
+INFO     Running default > syntax
+
+playbook: /home/ditry/ansible_study_5/playbook/roles/vector-role/molecule/default/converge.yml
+INFO     Running default > create
+
+PLAY [Create] ******************************************************************
+
+TASK [Log into a Docker registry] **********************************************
+skipping: [localhost] => (item=None) 
+skipping: [localhost] => (item=None) 
+skipping: [localhost]
+
+TASK [Check presence of custom Dockerfiles] ************************************
+ok: [localhost] => (item={'image': 'docker.io/pycontribs/centos:8', 'name': 'centos_8', 'pre_build_image': True})
+ok: [localhost] => (item={'image': 'docker.io/pycontribs/ubuntu:latest', 'name': 'ubuntu_last', 'pre_build_image': True})
+
+TASK [Create Dockerfiles from image names] *************************************
+skipping: [localhost] => (item={'image': 'docker.io/pycontribs/centos:8', 'name': 'centos_8', 'pre_build_image': True}) 
+skipping: [localhost] => (item={'image': 'docker.io/pycontribs/ubuntu:latest', 'name': 'ubuntu_last', 'pre_build_image': True}) 
+skipping: [localhost]
+
+TASK [Discover local Docker images] ********************************************
+ok: [localhost] => (item={'changed': False, 'skipped': True, 'skip_reason': 'Conditional result was False', 'false_condition': 'not item.pre_build_image | default(false)', 'item': {'image': 'docker.io/pycontribs/centos:8', 'name': 'centos_8', 'pre_build_image': True}, 'ansible_loop_var': 'item', 'i': 0, 'ansible_index_var': 'i'})
+ok: [localhost] => (item={'changed': False, 'skipped': True, 'skip_reason': 'Conditional result was False', 'false_condition': 'not item.pre_build_image | default(false)', 'item': {'image': 'docker.io/pycontribs/ubuntu:latest', 'name': 'ubuntu_last', 'pre_build_image': True}, 'ansible_loop_var': 'item', 'i': 1, 'ansible_index_var': 'i'})
+
+TASK [Build an Ansible compatible image (new)] *********************************
+skipping: [localhost] => (item=molecule_local/docker.io/pycontribs/centos:8) 
+skipping: [localhost] => (item=molecule_local/docker.io/pycontribs/ubuntu:latest) 
+skipping: [localhost]
+
+TASK [Create docker network(s)] ************************************************
+skipping: [localhost]
+
+TASK [Determine the CMD directives] ********************************************
+ok: [localhost] => (item={'image': 'docker.io/pycontribs/centos:8', 'name': 'centos_8', 'pre_build_image': True})
+ok: [localhost] => (item={'image': 'docker.io/pycontribs/ubuntu:latest', 'name': 'ubuntu_last', 'pre_build_image': True})
+
+TASK [Create molecule instance(s)] *********************************************
+changed: [localhost] => (item=centos_8)
+changed: [localhost] => (item=ubuntu_last)
+
+TASK [Wait for instance(s) creation to complete] *******************************
+FAILED - RETRYING: [localhost]: Wait for instance(s) creation to complete (300 retries left).
+changed: [localhost] => (item={'failed': 0, 'started': 1, 'finished': 0, 'ansible_job_id': 'j154339947165.25479', 'results_file': '/home/ditry/.ansible_async/j154339947165.25479', 'changed': True, 'item': {'image': 'docker.io/pycontribs/centos:8', 'name': 'centos_8', 'pre_build_image': True}, 'ansible_loop_var': 'item'})
+changed: [localhost] => (item={'failed': 0, 'started': 1, 'finished': 0, 'ansible_job_id': 'j321216606744.25501', 'results_file': '/home/ditry/.ansible_async/j321216606744.25501', 'changed': True, 'item': {'image': 'docker.io/pycontribs/ubuntu:latest', 'name': 'ubuntu_last', 'pre_build_image': True}, 'ansible_loop_var': 'item'})
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=5    changed=2    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0
+
+INFO     Running default > prepare
+WARNING  Skipping, prepare playbook not configured.
+INFO     Running default > converge
+
+PLAY [Converge] ****************************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [ubuntu_last]
+ok: [centos_8]
+
+TASK [Include vector-role] *****************************************************
+
+TASK [vector-role : Get vector rpm] ********************************************
+skipping: [ubuntu_last]
+changed: [centos_8]
+
+TASK [vector-role : Prepare repo] **********************************************
+skipping: [ubuntu_last]
+ok: [centos_8]
+
+TASK [vector-role : Install vector rpm] ****************************************
+skipping: [ubuntu_last]
+changed: [centos_8]
+
+TASK [vector-role : Get vector deb] ********************************************
+skipping: [centos_8]
+changed: [ubuntu_last]
+
+TASK [vector-role : Install vector deb] ****************************************
+skipping: [centos_8]
+changed: [ubuntu_last]
+
+TASK [vector-role : Configure Vector | Template config] ************************
+changed: [ubuntu_last]
+changed: [centos_8]
+
+TASK [vector-role : Create source log file] ************************************
+changed: [ubuntu_last]
+changed: [centos_8]
+
+TASK [vector-role : Start vector process] **************************************
+ok: [centos_8]
+ok: [ubuntu_last]
+
+PLAY RECAP *********************************************************************
+centos_8                   : ok=7    changed=4    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+ubuntu_last                : ok=6    changed=4    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0
+
+INFO     Running default > idempotence
+
+PLAY [Converge] ****************************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [ubuntu_last]
+ok: [centos_8]
+
+TASK [Include vector-role] *****************************************************
+
+TASK [vector-role : Get vector rpm] ********************************************
+skipping: [ubuntu_last]
+ok: [centos_8]
+
+TASK [vector-role : Prepare repo] **********************************************
+skipping: [ubuntu_last]
+ok: [centos_8]
+
+TASK [vector-role : Install vector rpm] ****************************************
+skipping: [ubuntu_last]
+ok: [centos_8]
+
+TASK [vector-role : Get vector deb] ********************************************
+skipping: [centos_8]
+ok: [ubuntu_last]
+
+TASK [vector-role : Install vector deb] ****************************************
+skipping: [centos_8]
+ok: [ubuntu_last]
+
+TASK [vector-role : Configure Vector | Template config] ************************
+ok: [ubuntu_last]
+ok: [centos_8]
+
+TASK [vector-role : Create source log file] ************************************
+ok: [ubuntu_last]
+ok: [centos_8]
+
+TASK [vector-role : Start vector process] **************************************
+ok: [ubuntu_last]
+ok: [centos_8]
+
+PLAY RECAP *********************************************************************
+centos_8                   : ok=7    changed=0    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+ubuntu_last                : ok=6    changed=0    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0
+
+INFO     Idempotence completed successfully.
+INFO     Running default > side_effect
+WARNING  Skipping, side effect playbook not configured.
+INFO     Running default > verify
+INFO     Running Ansible Verifier
+
+PLAY [Verify] ******************************************************************
+
+TASK [Get status of vector config file] ****************************************
+ok: [centos_8]
+ok: [ubuntu_last]
+
+TASK [Check if vector config file exists] **************************************
+ok: [centos_8] => {
+    "changed": false,
+    "msg": "Vector config file exists"
+}
+ok: [ubuntu_last] => {
+    "changed": false,
+    "msg": "Vector config file exists"
+}
+
+TASK [Vector config validating] ************************************************
+changed: [ubuntu_last]
+changed: [centos_8]
+
+TASK [Check result of validating] **********************************************
+ok: [centos_8] => {
+    "changed": false,
+    "msg": "Vector config valid!"
+}
+ok: [ubuntu_last] => {
+    "changed": false,
+    "msg": "Vector config valid!"
+}
+
+TASK [Get process PID] *********************************************************
+changed: [centos_8]
+changed: [ubuntu_last]
+
+TASK [Check running vector process] ********************************************
+ok: [ubuntu_last] => {
+    "changed": false,
+    "msg": "PIDS of Vector:480 912"
+}
+ok: [centos_8] => {
+    "changed": false,
+    "msg": "PIDS of Vector:469 877"
+}
+
+PLAY RECAP *********************************************************************
+centos_8                   : ok=6    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+ubuntu_last                : ok=6    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+INFO     Verifier completed successfully.
+INFO     Running default > cleanup
+WARNING  Skipping, cleanup playbook not configured.
+INFO     Running default > destroy
+
+PLAY [Destroy] *****************************************************************
+
+TASK [Destroy molecule instance(s)] ********************************************
+changed: [localhost] => (item=centos_8)
+changed: [localhost] => (item=ubuntu_last)
+
+TASK [Wait for instance(s) deletion to complete] *******************************
+FAILED - RETRYING: [localhost]: Wait for instance(s) deletion to complete (300 retries left).
+changed: [localhost] => (item=centos_8)
+changed: [localhost] => (item=ubuntu_last)
+
+TASK [Delete docker networks(s)] ***********************************************
+skipping: [localhost]
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=2    changed=2    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0
+
+INFO     Pruning extra files from scenario ephemeral directory

@@ -1,0 +1,12 @@
+---
+- name: Istall the latest version of git
+  become: true
+  ansible.builtin.yum:
+    name: git
+    state: present
+- name: Clone lighthouse
+  become: true
+  ansible.builtin.git:
+    repo: "{{ lighthouse_source_url }}"
+    dest: "{{ lighthouse_dir }}"
+    version: master
