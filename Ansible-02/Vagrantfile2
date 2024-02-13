@@ -1,0 +1,33 @@
+Vagrant.configure("2") do |config|
+    #Make clickhouse host
+    config.vm.define "clickhouse-01" do |web|
+        config.vm.box = "centos/7"
+        config.vm.network "public_network", 
+            bridge: "eno1",
+            ip: "192.168.1.10"
+        config.ssh.insert_key = false
+        config.vm.provision "shell", inline: <<-SHELL
+            sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config    
+            systemctl restart sshd.service
+        SHELL
+    end
+    #Make vector hosts
+    n = 1
+    (1..n).each do |i|
+        config.vm.define "clickhouse-0#{i}" do |web|
+            config.vm.box = "centos/7"
+            config.vm.network "public_network", 
+              bridge: "eno1",
+              ip: "192.168.1.1#{i}"
+            config.ssh.insert_key = false
+            config.vm.provision "shell", inline: <<-SHELL
+               sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config    
+               systemctl restart sshd.service
+            SHELL
+        end
+    end
+    config.vm.provider "virtualbox" do |v|
+        v.cpus = 2
+        v.memory = 4096
+      end
+end
