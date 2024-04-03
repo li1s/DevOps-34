@@ -73,8 +73,8 @@ object Build : BuildType({
 })
 
 object GitGithubComL1isExampleTeamcityGitRefsHeadsMaster : GitVcsRoot({
-    name = "git@github.com:l1is/example-teamcity.git#refs/heads/master"
-    url = "git@github.com:l1is/example-teamcity.git"
+    name = "git@github.com:l1is/DevOps-34/example-teamcity.git#refs/heads/master"
+    url = "git@github.com:l1is/DevOps-34/example-teamcity.git"
     branch = "refs/heads/master"
     branchSpec = "refs/heads/*"
     authMethod = uploadedKey {
