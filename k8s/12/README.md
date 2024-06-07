@@ -1,94 +1,172 @@
-# Домашнее задание к занятию «Установка Kubernetes»
+# Домашнее задание к занятию Troubleshooting
 
 ### Цель задания
 
-Установить кластер K8s.
+Устранить неисправности при деплое приложения.
 
 ### Чеклист готовности к домашнему заданию
 
-1. Развёрнутые ВМ с ОС Ubuntu 20.04-lts.
+1. Кластер K8s.
 
-### Инструменты и дополнительные материалы, которые пригодятся для выполнения задания
+### Задание. При деплое приложение web-consumer не может подключиться к auth-db. Необходимо это исправить
 
-1. [Инструкция по установке kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/).
-2. [Документация kubespray](https://kubespray.io/).
+1. Установить приложение по команде:
 
------
-
-### Задание 1. Установить кластер k8s с 1 master node
-
-> 1. Подготовка работы кластера из 5 нод: 1 мастер и 4 рабочие ноды.
-> 2. В качестве CRI — containerd.
-> 3. Запуск etcd производить на мастере.
-> 4. Способ установки выбрать самостоятельно.
-
------
-
-### Задание 2*. Установить HA кластер
-
-> 1. Установить кластер в режиме HA.
-> 2. Использовать нечётное количество Master-node.
-> 3. Для cluster ip использовать keepalived или другой способ.
-
-### Решение:
-
-Так как мы ранее уже поднимали кластер с помощью `kubeadm`, решил познакомиться с инструментом `kubespray` и поднять `HA` кластер на виртуальных машинах в `Yandex Cloud`.
-
-#### ВМ и Terraform
-
-Для создания ВМ и остальных ресурсов использовал Terraform. ([./terraform/](terraform)).
-Манифестами создаем 3 ноды `control`, а также 4 ноды `worker`, все параметры регулируются переменными в [variables.tf](terraform/variables.tf).\
-
-Также terraform генерирует файл `hosts.yml` в нужном формате для kubespray, по шаблону [inventory.tftpl](terraform/inventory.tftpl)
-
-Результат создания инфраструктуры:
-![](img/01.png)
-![](img/02.png)
-
-#### Kubespray
-
-Подготовил необходимое окружение для kubespray по официальной документации. Для запуска плейбука будем использовать ранее сгенерированный `hosts.yml`.
-
-Также необходимо изменить параметры кластера для плейбука `kubespray` под наше окружение. Каталог с параметрами находится в [./inventory/](inventory).  
-Из важного, что стоит отдельно упомянуть:
-
- Настроил локальный loadbalancer на нодах, чтобы распределять запросы по control-plane нодам.  
- Это самый простой способ, т.к. Yandex Cloud vrrp не поддерживает, а значит, keepalived и kube-vip не взлетят (пробовал).   
- Для этих целей в YC есть Network Load Balancer и Application Load Balancer, но NLB блокирует обращение ноды самой к себе (что бракует 33% трафика и ломает Join master-нод), а ALB сложно настроить сразу в процессе раскатки кластера, т.к. по порту 6443 нужно подсоединяться с TLS, а серты генерируются в пайплайне. 
- Можно сначала установить кластер полностью, а затем поднимать ALB и перенастраивать трафик, но лучше уж тогда использовать Managed Kubernetes. Либо поднимать на bare-metal
-    
-    ```yaml
-    loadbalancer_apiserver_localhost: true
-    loadbalancer_apiserver_type: nginx 
-    loadbalancer_apiserver_port: 6443
-    ```  
-1. В качестве CRI — containerd
-    ```yaml
-    container_manager: containerd
-    ```
-2. etcd по умолчанию на мастер-нодах.
-
-Активировал собранное окружение и запустил плейбук `kubespray`:
-![](img/07.png)
 ```shell
-ansible-playbook -i /mnt/e/netology-devops-homeworks/08-kuber/12-install/inventory/cluster/hosts.yml --become --become-user=root cluster.yml
+kubectl apply -f https://raw.githubusercontent.com/netology-code/kuber-homeworks/main/3.5/files/task.yaml
 ```
 
-Установка выполнена успешно:
-![](img/03.png)
+2. Выявить проблему и описать.
+3. Исправить проблему, описать, что сделано.
+4. Продемонстрировать, что проблема решена.
 
-На ноде проверил состояние:
+### Ответ
+
+1. Отсутствуют необходимые namespace:
+
+![](2024-06-07_15-51.png)
+
 ```shell
-kubectl get nodes -o wide
+devops-netology/55_K8S_Extended/05.Troubleshooting git:main  13s
+❯ kubectl apply -f .                                  
+Error from server (NotFound): error when creating "task.yaml": namespaces "web" not found
+Error from server (NotFound): error when creating "task.yaml": namespaces "data" not found
+Error from server (NotFound): error when creating "task.yaml": namespaces "data" not found
 ```
-![](img/04.png)
 
-ETCD работает без ошибок:
-![](img/06.png)
+**Решение:**
 
-Также проверил поды:
+![](2024-06-07_15-51_1.png)
+
 ```shell
-kubectl get pods
+devops-netology/55_K8S_Extended/05.Troubleshooting git:main  
+❯ kubectl create namespace web
+namespace/web created
+                                                                                                                               
+devops-netology/55_K8S_Extended/05.Troubleshooting git:main  
+❯ kubectl create namespace data
+namespace/data created
 ```
-![](img/05.png)
 
+![](2024-06-07_15-52.png)
+
+```shell
+devops-netology/55_K8S_Extended/05.Troubleshooting git:main  
+❯ kubectl get pods -A          
+NAMESPACE     NAME                                       READY   STATUS    RESTARTS        AGE
+kube-system   calico-kube-controllers-6f469498b4-j8jsh   1/1     Running   94 (25m ago)    13d
+kube-system   calico-node-92d7r                          1/1     Running   85 (25m ago)    13d
+kube-system   coredns-7745f9f87f-8zfjv                   1/1     Running   312 (25m ago)   62d
+kube-system   metrics-server-7747f8d66b-vhnhv            1/1     Running   312 (25m ago)   62d
+data          auth-db-864ff9854c-wtqmn                   1/1     Running   0               5m5s
+web           web-consumer-5769f9f766-v4t47              1/1     Running   0               5m5s
+web           web-consumer-5769f9f766-7gl2s              1/1     Running   0               5m5s
+```
+
+2. Web-consumer не может найти auth-db
+
+```shell
+devops-netology/55_K8S_Extended/05.Troubleshooting git:main  
+❯ kubectl logs -n web deployments/web-consumer                 
+Found 2 pods, using pod/web-consumer-84fc79d94d-5njwx
+curl: (6) Couldn't resolve host 'auth-db'
+curl: (6) Couldn't resolve host 'auth-db'
+```
+
+**Решение**
+
+Так как сервис `auth-db` находится в другом пространстве имён, необходимо использовать полный FQDN ресурса, или как минимум указать на namespace:
+
+```yaml
+      containers:
+      - command:
+        - sh
+        - -c
+        - while true; do curl auth-db.data.svc.cluster.local; sleep 5; done # либо просто auth-db.data
+        image: radial/busyboxplus:curl
+        name: busybox
+---
+```
+
+После пересоздания с обновлёнными параметрами:
+
+![](2024-06-07_15-52_1.png)
+
+```shell
+devops-netology/55_K8S_Extended/05.Troubleshooting git:main  
+❯ kubectl logs -n web deployments/web-consumer 
+Found 4 pods, using pod/web-consumer-5769f9f766-nr8vc
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   612  100   612    0     0   330k      0 --:--:-- --:--:-- --:--:--  597k
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   612  100   612    0     0   101k      0 --:--:-- --:--:-- --:--:--  597k
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+```
+
+```shell
+devops-netology/55_K8S_Extended/05.Troubleshooting git:main  
+❯ kubectl logs -n data auth-db-864ff9854c-wtqmn 
+/docker-entrypoint.sh: /docker-entrypoint.d/ is not empty, will attempt to perform configuration
+/docker-entrypoint.sh: Looking for shell scripts in /docker-entrypoint.d/
+/docker-entrypoint.sh: Launching /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh
+10-listen-on-ipv6-by-default.sh: Getting the checksum of /etc/nginx/conf.d/default.conf
+10-listen-on-ipv6-by-default.sh: Enabled listen on IPv6 in /etc/nginx/conf.d/default.conf
+/docker-entrypoint.sh: Launching /docker-entrypoint.d/20-envsubst-on-templates.sh
+/docker-entrypoint.sh: Configuration complete; ready for start up
+10.1.125.252 - - [16/Aug/2023:23:22:14 +0000] "GET / HTTP/1.1" 200 612 "-" "curl/7.35.0" "-"
+10.1.125.249 - - [16/Aug/2023:23:22:16 +0000] "GET / HTTP/1.1" 200 612 "-" "curl/7.35.0" "-"
+10.1.125.239 - - [16/Aug/2023:23:22:18 +0000] "GET / HTTP/1.1" 200 612 "-" "curl/7.35.0" "-"
+10.1.125.195 - - [16/Aug/2023:23:22:18 +0000] "GET / HTTP/1.1" 200 612 "-" "curl/7.35.0" "-"
+...
+```
